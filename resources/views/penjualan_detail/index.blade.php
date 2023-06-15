@@ -253,16 +253,6 @@
                 var id = $(this).data('id');
                 var jumlah = parseInt($(this).val());
 
-                if (jumlah < 1) {
-                    alert('Jumlah tidak boleh kurang dari 1');
-                    return;
-                }
-
-                if (jumlah > 10000) {
-                    alert('Jumlah melebihi batas maximum');
-                    return;
-                }
-
                 $.post(`{{ url('/transaksi') }}/${id}`, {
                         '_token': '{{ csrf_token() }}',
                         '_method': 'put',

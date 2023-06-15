@@ -99,5 +99,15 @@ class UserSeeder extends Seeder
         $kasir->assignRole('kasir');
         $kasir->givePermissionTo($kasir_p);
         $kasir->givePermissionTo($transaksi);
+
+        $kasir2 = User::create([
+            'name'      => 'kasir2',
+            'email'     => 'kasir2@gmail.com',
+            'password'  => bcrypt('12345678')
+        ]);
+
+        $kasir2->assignRole('kasir');
+        $kasir2->givePermissionTo($kasir_p);
+        $kasir2->givePermissionTo($transaksi);
     }
 }

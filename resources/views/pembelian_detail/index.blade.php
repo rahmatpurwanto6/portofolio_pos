@@ -221,17 +221,6 @@
                 let id = $(this).data('id');
                 let jumlah = parseInt($(this).val());
 
-                if (jumlah < 1) {
-                    $(this).val(1);
-                    alert('Jumlah tidak boleh kurang dari 1');
-                    return;
-                }
-                if (jumlah > 10000) {
-                    $(this).val(10000);
-                    alert('Jumlah tidak boleh lebih dari 10000');
-                    return;
-                }
-
                 $.post(`{{ url('/pembelian_detail') }}/${id}`, {
                         '_token': $('[name=csrf-token]').attr('content'),
                         '_method': 'put',
@@ -246,6 +235,7 @@
                         alert('Tidak dapat menyimpan data');
                         return;
                     });
+
             });
 
             $(document).on('input', '#diskon', function() {

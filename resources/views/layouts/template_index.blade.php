@@ -184,24 +184,24 @@
                             </li>
                         @endrole
 
-
-                        <li class="nav-item">
-                            <a href="{{ route('transaksi.baru') }}" class="nav-link">
-                                <i class="nav-icon fas fa-cart-plus"></i>
-                                <p>
-                                    Transaksi Baru
-                                </p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('transaksi.index') }}" class="nav-link">
-                                <i class="nav-icon fas fa-cart-plus"></i>
-                                <p>
-                                    Transaksi Aktif
-                                </p>
-                            </a>
-                        </li>
-
+                        @role(['admin', 'kasir'])
+                            <li class="nav-item">
+                                <a href="{{ route('transaksi.baru') }}" class="nav-link">
+                                    <i class="nav-icon fas fa-cart-plus"></i>
+                                    <p>
+                                        Transaksi Baru
+                                    </p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('transaksi.index') }}" class="nav-link">
+                                    <i class="nav-icon fas fa-cart-plus"></i>
+                                    <p>
+                                        Transaksi Aktif
+                                    </p>
+                                </a>
+                            </li>
+                        @endrole
 
                         @role('admin')
                             <li class="nav-item">

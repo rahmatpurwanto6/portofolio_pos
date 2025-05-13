@@ -217,9 +217,27 @@
 
             $('.table-supplier').DataTable();
 
-            $(document).on('input', '.jumlah', function() {
+            function debounce(func, wait) {
+                let timeout;
+                return function(...args) {
+                    const context = this;
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(context, args), wait);
+                };
+            }
+
+            $(document).on('input', '.jumlah', debounce(function() {
                 let id = $(this).data('id');
                 let jumlah = parseInt($(this).val());
+
+                if (isNaN(jumlah) || jumlah <= 0) {
+                    alert('Jumlah harus berupa angka positif');
+                    return;
+                }
+
+                // Tampilkan indikator loading
+                let loadingIndicator = $('<span class="loading-indicator">Loading...</span>');
+                $(this).after(loadingIndicator);
 
                 $.post(`{{ url('/pembelian_detail') }}/${id}`, {
                         '_token': $('[name=csrf-token]').attr('content'),
@@ -227,16 +245,16 @@
                         'jumlah': jumlah
                     })
                     .done(response => {
-                        $(this).on('mouseout', function() {
-                            table.ajax.reload(() => loadForm($('#diskon').val()));
-                        });
+                        // Reload seluruh tabel untuk memastikan data diperbarui
+                        table.ajax.reload(() => loadForm($('#diskon').val()));
                     })
                     .fail(errors => {
                         alert('Tidak dapat menyimpan data');
-                        return;
+                    })
+                    .always(() => {
+                        loadingIndicator.remove();
                     });
-
-            });
+            }, 300)); // Debounce selama 300ms
 
             $(document).on('input', '#diskon', function() {
                 if ($(this).val() == "") {
@@ -251,11 +269,17 @@
             });
         });
 
+        let isModalProdukVisible = false;
+
         function tampilProduk() {
+            if (isModalProdukVisible) return;
+            isModalProdukVisible = true;
             $('#modal-produk').modal('show');
         }
 
         function hideProduk() {
+            if (!isModalProdukVisible) return;
+            isModalProdukVisible = false;
             $('#modal-produk').modal('hide');
         }
 

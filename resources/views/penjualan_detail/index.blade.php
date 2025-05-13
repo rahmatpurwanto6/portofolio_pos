@@ -184,6 +184,15 @@
     <script src="{{ asset('assets') }}/plugins/sweetalert2/sweetalert2.min.js"></script>
 
     <script>
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), wait);
+            };
+        }
+
         let table, table2;
 
         $(function() {
@@ -249,9 +258,18 @@
 
             $('.table-member').DataTable();
 
-            $(document).on('input', '.jumlah', function() {
-                var id = $(this).data('id');
-                var jumlah = parseInt($(this).val());
+            $(document).on('input', '.jumlah', debounce(function() {
+                let id = $(this).data('id');
+                let jumlah = parseInt($(this).val());
+
+                if (isNaN(jumlah) || jumlah <= 0) {
+                    alert('Jumlah harus berupa angka positif');
+                    return;
+                }
+
+                // Tampilkan indikator loading
+                let loadingIndicator = $('<span class="loading-indicator">Loading...</span>');
+                $(this).after(loadingIndicator);
 
                 $.post(`{{ url('/transaksi') }}/${id}`, {
                         '_token': '{{ csrf_token() }}',
@@ -259,15 +277,16 @@
                         'jumlah': jumlah
                     })
                     .done(response => {
-                        $(this).on('mouseout', function() {
-                            table.ajax.reload(() => loadForm($('diskon').val()));
-                        });
+                        // Reload seluruh tabel untuk memastikan data diperbarui
+                        table.ajax.reload(() => loadForm($('#diskon').val()));
                     })
                     .fail(errors => {
-                        alert('Tidak dapat menghapus data');
-                        return;
+                        alert('Tidak dapat menyimpan data');
+                    })
+                    .always(() => {
+                        loadingIndicator.remove();
                     });
-            });
+            }, 300)); // Debounce selama 300ms
 
             $(document).on('input', '#diskon', function() {
                 if ($(this).val() == "") {
@@ -297,28 +316,52 @@
 
         });
 
+        let isModalMemberVisible = false;
+
         function tampilMember() {
+            if (isModalMemberVisible) {
+                console.log('tampilMember called but modal is already visible');
+                return;
+            }
+            console.log('Opening modal-member');
+            isModalMemberVisible = true;
             $('#modal-member').modal('show');
         }
 
         function pilihMember(id, kode) {
+            console.log('pilihMember called with id:', id, 'kode:', kode);
             $('#id_member').val(id);
             $('#kode_member').val(kode);
             $('#diskon').val('{{ $diskon }}');
             loadForm($('#diskon').val());
             $('#diterima').val(0).focus().select();
+            console.log('Calling hideMember from pilihMember');
             hideMember();
         }
 
         function hideMember() {
+            if (!isModalMemberVisible) {
+                console.log('hideMember called but modal is already hidden');
+                return;
+            }
+            console.log('Closing modal-member');
+            isModalMemberVisible = false;
             $('#modal-member').modal('hide');
         }
 
+        let isModalProdukVisible = false;
+
         function tampilProduk() {
+            if (isModalProdukVisible) return;
+            console.log('Opening modal-produk');
+            isModalProdukVisible = true;
             $('#modal-produk').modal('show');
         }
 
         function hideProduk() {
+            if (!isModalProdukVisible) return;
+            console.log('Closing modal-produk');
+            isModalProdukVisible = false;
             $('#modal-produk').modal('hide');
         }
 
@@ -380,5 +423,10 @@
                     return;
                 })
         }
+
+        $(document).on('hidden.bs.modal', '#modal-member', function () {
+            console.log('Modal-member hidden event triggered');
+            isModalMemberVisible = false;
+        });
     </script>
 @endsection
